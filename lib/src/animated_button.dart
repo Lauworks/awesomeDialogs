@@ -1,132 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:simple_animations/simple_animations.dart';
 
 class AnimatedButton extends StatefulWidget {
   final Function pressEvent;
-  final String? text;
-  final IconData? icon;
+  final String text;
+  final IconData icon;
   final double width;
-  final double? height;
   final bool isFixedHeight;
-  final Color? color;
-  final BorderRadiusGeometry? borderRadius;
-  final TextStyle? buttonTextStyle;
-
+  final Color color;
+  final BorderRadiusGeometry borderRadius;
+  final Color textIconColor;
   const AnimatedButton({
-    required this.pressEvent,
+    @required this.pressEvent,
     this.text,
     this.icon,
     this.color,
-    this.height,
     this.isFixedHeight = true,
     this.width = double.infinity,
     this.borderRadius,
-    this.buttonTextStyle,
+    this.textIconColor,
   });
-
   @override
   _AnimatedButtonState createState() => _AnimatedButtonState();
 }
 
-class _AnimatedButtonState extends State<AnimatedButton>
-    with SingleTickerProviderStateMixin {
-  static const int _forwardDurationNumber = 150;
-  late AnimationController _animationController;
-  late Animation<double> _scale;
+class _AnimatedButtonState extends State<AnimatedButton> with AnimationMixin {
+  Animation<double> _scale;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: _forwardDurationNumber),
-      reverseDuration: const Duration(milliseconds: 100),
-    )..addStatusListener(
-        _animationStatusListener,
-      );
-    _scale = Tween<double>(
-      begin: 1,
-      end: 0.9,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-        reverseCurve: Curves.easeIn,
-      ),
-    );
+    final curveAnimation = CurvedAnimation(
+        parent: controller, curve: Curves.easeIn, reverseCurve: Curves.easeIn);
+    _scale = Tween<double>(begin: 1, end: 0.9).animate(curveAnimation);
   }
 
-  void _animationStatusListener(AnimationStatus status) {
-    if (status == AnimationStatus.completed) _animationController.reverse();
+  void _onTapDown(TapDownDetails details) {
+    controller.play(duration: Duration(milliseconds: 150));
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _onTap() async {
-    _animationController.forward();
-    //Delayed added in purpose to keep same animation behavior as previous version when dialog was closed while animation was still playing
-    await Future.delayed(
-      const Duration(milliseconds: _forwardDurationNumber ~/ 2),
-    );
-    widget.pressEvent();
+  void _onTapUp(TapUpDetails details) {
+    if (controller.isAnimating) {
+      controller.addStatusListener((status) {
+        if (status == AnimationStatus.completed)
+          controller.playReverse(duration: Duration(milliseconds: 100));
+      });
+    } else
+      controller.playReverse(duration: Duration(milliseconds: 100));
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scale,
-      child: _animatedButtonUI,
+    return GestureDetector(
+      onTap: () {
+        widget.pressEvent();
+        //  _controller.forward();
+      },
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: () {
+        controller.playReverse(
+          duration: Duration(milliseconds: 100),
+        );
+      },
+      child: Transform.scale(
+        scale: _scale.value,
+        child: _animatedButtonUI,
+      ),
     );
   }
 
-  Widget get _animatedButtonUI => SizedBox(
+  Widget get _animatedButtonUI => Container(
+        height: widget.isFixedHeight ? 50.0 : null,
         width: widget.width,
-        height: widget.isFixedHeight ? 50 : widget.height,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              elevation: 0,
-              primary: widget.color,
-              shape: RoundedRectangleBorder(
-                borderRadius: widget.borderRadius ??
-                    const BorderRadius.all(
-                      Radius.circular(100),
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+            borderRadius:
+                widget.borderRadius ?? BorderRadius.all(Radius.circular(100)),
+            color: widget.color ?? Theme.of(context).primaryColor),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            widget.icon != null
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 4.0),
+                    child: Icon(
+                      widget.icon,
+                      color: widget.textIconColor!=null?widget.textIconColor:Colors.white,
                     ),
-              )),
-          onPressed: _onTap,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              if (widget.icon != null) ...[
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0),
-                  child: Icon(
-                    widget.icon,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-              ],
-              Flexible(
-                fit: FlexFit.loose,
-                child: Text(
-                  '${widget.text}',
-                  // maxLines: 1,
-                  textAlign: TextAlign.center,
-                  style: widget.buttonTextStyle ??
-                      const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
-                ),
+                  )
+                : SizedBox(),
+            SizedBox(
+              width: 5,
+            ),
+            Flexible(
+              fit: FlexFit.loose,
+              child: Text(
+                '${widget.text}',
+                // maxLines: 1,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color:widget.textIconColor!=null?widget.textIconColor:Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
 }

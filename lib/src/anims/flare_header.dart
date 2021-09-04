@@ -3,7 +3,7 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 
 class FlareHeader extends StatelessWidget {
-  const FlareHeader({Key? key, required this.dialogType, required this.loop})
+  const FlareHeader({Key key, @required this.dialogType, @required this.loop})
       : super(key: key);
   final DialogType dialogType;
   final bool loop;
@@ -13,29 +13,15 @@ class FlareHeader extends StatelessWidget {
     switch (dialogType) {
       case DialogType.INFO:
         return FlareActor(
-          "packages/awesome_dialog/assets/flare/info2.flr",
-          alignment: Alignment.center,
-          fit: BoxFit.cover,
-          animation: loop ? 'appear_loop' : 'appear',
-          callback: (call) {},
-        );
-      case DialogType.INFO_REVERSED:
-        return FlareActor(
           loop
               ? "packages/awesome_dialog/assets/flare/info.flr"
               : "packages/awesome_dialog/assets/flare/info_without_loop.flr",
           alignment: Alignment.center,
           fit: BoxFit.cover,
           animation: 'appear',
-        );
-      case DialogType.QUESTION:
-        return FlareActor(
-          "packages/awesome_dialog/assets/flare/question.flr",
-          alignment: Alignment.center,
-          fit: BoxFit.cover,
-          animation: loop ? 'anim_loop' : 'anim',
           callback: (call) {},
         );
+        break;
       case DialogType.WARNING:
         return FlareActor(
           loop
@@ -45,13 +31,17 @@ class FlareHeader extends StatelessWidget {
           fit: BoxFit.cover,
           animation: 'appear',
         );
+        break;
       case DialogType.ERROR:
         return FlareActor(
-          "packages/awesome_dialog/assets/flare/error.flr",
+          loop
+              ? "packages/awesome_dialog/assets/flare/error.flr"
+              : "packages/awesome_dialog/assets/flare/error_without_loop.flr",
           alignment: Alignment.center,
           fit: BoxFit.fill,
-          animation: loop ? 'Error' : 'Error_no_loop',
+          animation: 'Error',
         );
+        break;
       case DialogType.SUCCES:
         return FlareActor(
           loop
@@ -61,8 +51,16 @@ class FlareHeader extends StatelessWidget {
           fit: BoxFit.fill,
           animation: 'Untitled',
         );
+        break;
       default:
-        return const SizedBox.shrink();
+        return FlareActor(
+          loop
+              ? "packages/awesome_dialog/assets/flare/info.flr"
+              : "packages/awesome_dialog/assets/flare/info_without_loop.flr",
+          alignment: Alignment.center,
+          fit: BoxFit.cover,
+          animation: 'appear',
+        );
     }
   }
 }
