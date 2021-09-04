@@ -1,15 +1,3 @@
-## [2.1.1] - 17/8/2021.
-* Fix useRootNavigator for nested routes.
-## [2.1.0] - 27/5/2021.
-* Migrated AnimatedButton to underline use ElevetedButton from flutter core.
-* Improve padding in Error Animation.
-* onDismiss Callback now indicates by which method the dialog was dismissed using an Enum. 
-## [2.0.0] - 27/4/2021.
-* Null safety stable release.
-## [2.0.0-nullsafety.1] - 31/3/2021.
-* Added DialogType INFO_REVERSED
-## [2.0.0-nullsafety.0] - 13/3/2021.
-* Migrated to Null Safety.
 ## [1.3.2] - 2/3/2021.
 * Added Property buttonsTextStyle, to AwesomeDialog to easy customize built in buttons.
 ## [1.3.1] - 13/1/2021.
